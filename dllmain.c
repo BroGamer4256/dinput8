@@ -45,7 +45,7 @@ void Init()
 #ifdef __cplusplus
 	SHGetKnownFolderPath(FOLDERID_System, 0, 0, &szSystemPath);
 #else
-    SHGetKnownFolderPath(&FOLDERID_System, 0, 0, &szSystemPath);
+	SHGetKnownFolderPath(&FOLDERID_System, 0, 0, &szSystemPath);
 #endif
 	wcstombs(buf, szSystemPath, MAX_PATH);
 	strcat(buf, "\\dinput8.dll");
