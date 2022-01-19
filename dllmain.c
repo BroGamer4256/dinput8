@@ -29,7 +29,11 @@ HRESULT DirectInput8Create(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPV
 HRESULT DllRegisterServer() { return _DllRegisterServer(); }
 HRESULT DllUnregisterServer() { return _DllUnregisterServer(); }
 HRESULT DllCanUnloadNow() { return _DllCanUnloadNow(); }
+#if __x86_64__
 HRESULT DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) { return _DllGetClassObject(rclsid, riid, ppv); }
+#else
+STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) { return _DllGetClassObject(rclsid, riid, ppv); }
+#endif
 
 #ifdef __cplusplus
 }
