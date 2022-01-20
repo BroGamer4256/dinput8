@@ -2,7 +2,7 @@ CC := clang
 TARGET := x86_64-pc-windows-gnu
 SRC = dllmain.c
 OBJ = ${SRC:.c=.o}
-CFLAGS = -std=c99 -pedantic -Wall -Ofast -target ${TARGET}
+CFLAGS = -std=c99 -pedantic -Wall -Ofast -target ${TARGET} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=_WIN32_WINNT_WIN7
 LDFLAGS = -shared -luuid -s -static
 
 all: options dinput8
