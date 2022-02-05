@@ -1,26 +1,28 @@
+OUT := dinput8 
 CC := clang
 TARGET := x86_64-pc-windows-gnu
 SRC = dllmain.c
-OBJ = ${SRC:.c=.o}
+OBJ = ${TARGET}/${SRC:.c=.o}
 CFLAGS = -std=c99 -pedantic -Wall -Ofast -target ${TARGET} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=_WIN32_WINNT_WIN7
-LDFLAGS = -shared -luuid -s -static
+LDFLAGS := -shared -luuid -s -static
 
-all: options dinput8
+all: options ${OUT}
 
 options:
-	if [ ! -d ${TARGET} ]; then \
-		mkdir ${TARGET}; \
-	fi
-	@echo dinput8 build options:
 	@echo "CFLAGS	= ${CFLAGS}"
 	@echo "LDFLAGS	= ${LDFLAGS}"
 	@echo "CC	= ${CC}"
 
-.c.o:
-	${CC} -c ${CFLAGS} $< -o ${TARGET}/$@
+${TARGET}:
+	@mkdir ${TARGET}
 
-dinput8: ${OBJ}
-	${CC} ${CFLAGS} -o ${TARGET}/$@.dll ${TARGET}/${OBJ} ${LDFLAGS}
+${TARGET}/%.o: %.c
+	@echo BUILD $@
+	@${CC} -c ${CFLAGS} $< -o $@
+
+${OUT}: | ${TARGET} ${OBJ}
+	@echo LINK $@
+	@${CC} ${CFLAGS} -o ${TARGET}/$@.dll ${OBJ} ${LDFLAGS}
 
 clean:
 	rm -rf ${TARGET}

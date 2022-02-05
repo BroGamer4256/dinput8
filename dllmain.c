@@ -39,13 +39,14 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) { return _Dl
 }
 #endif
 
-static LONG OriginalLibraryLoaded = 0;
+_Bool inited = 0;
 void Init()
 {
 	char buf[MAX_PATH];
 	PWSTR szSystemPath;
 
-	if (_InterlockedCompareExchange(&OriginalLibraryLoaded, 1, 0) != 0) return;
+	if (inited == 0) return;
+	inited = 1;
 #ifdef __cplusplus
 	SHGetKnownFolderPath(FOLDERID_System, 0, 0, &szSystemPath);
 #else
@@ -59,8 +60,10 @@ void Init()
 
 void Load()
 {
-	char originalDir[MAX_PATH];
-	GetCurrentDirectoryA(MAX_PATH, originalDir);
+	char baseDir[MAX_PATH];
+	GetModuleFileNameA(0, baseDir, MAX_PATH);
+	*strrchr(baseDir, '\\') = 0;
+	SetCurrentDirectoryA(baseDir);
 
 	SetCurrentDirectoryA("plugins\\");
 	WIN32_FIND_DATAA fd;
@@ -86,7 +89,7 @@ void Load()
 			}
 		}
 	} while (FindNextFileA(file, &fd));
-	SetCurrentDirectoryA(originalDir);
+	SetCurrentDirectoryA(baseDir);
 }
 
 BOOL WINAPI DllMain(HMODULE mod, DWORD cause, void *ctx)
