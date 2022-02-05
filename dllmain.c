@@ -39,14 +39,11 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) { return _Dl
 }
 #endif
 
-_Bool inited = 0;
 void Init()
 {
 	char buf[MAX_PATH];
 	PWSTR szSystemPath;
 
-	if (inited == 0) return;
-	inited = 1;
 #ifdef __cplusplus
 	SHGetKnownFolderPath(FOLDERID_System, 0, 0, &szSystemPath);
 #else
@@ -60,43 +57,48 @@ void Init()
 
 void Load()
 {
-	char baseDir[MAX_PATH];
-	GetModuleFileNameA(0, baseDir, MAX_PATH);
-	*strrchr(baseDir, '\\') = 0;
-	SetCurrentDirectoryA(baseDir);
+	wchar_t baseDir[MAX_PATH];
+	GetModuleFileNameW(0, baseDir, MAX_PATH);
+	*wcsrchr(baseDir, '\\') = 0;
+	SetCurrentDirectoryW(baseDir);
 
-	SetCurrentDirectoryA("plugins\\");
-	WIN32_FIND_DATAA fd;
-	HANDLE file = FindFirstFileA("*.dva", &fd);
-	char dir[MAX_PATH];
-	GetCurrentDirectoryA(MAX_PATH, dir);
-	strcat(dir, "\\");
+	wchar_t dir[MAX_PATH];
+	wcscpy(dir, baseDir);
+	wcscat(dir, L"\\plugins\\");
+	SetCurrentDirectoryW(dir);
+
+	WIN32_FIND_DATAW fd;
+	HANDLE file = FindFirstFileW(L"*.dva", &fd);
 	if (file == INVALID_HANDLE_VALUE) return;
 
 	do
 	{
 		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
-		char filePath[MAX_PATH];
-		strcpy(filePath, dir);
+		wchar_t filePath[MAX_PATH];
+		wcscpy(filePath, dir);
 
-		char* dot = strrchr(fd.cFileName, '.');
-		if (dot && !strcmp(dot, ".dva"))
+		wchar_t* dot = wcsrchr(fd.cFileName, '.');
+		if (dot && !wcscmp(dot, L".dva"))
 		{
-			strcat(filePath, fd.cFileName);
-			if (LoadLibraryA(filePath) == 0)
+			wcscat(filePath, fd.cFileName);
+			if (LoadLibraryW(filePath) == 0)
 			{
-				MessageBoxA(0, strcat((char*)"Failed to load ", fd.cFileName), "", MB_ICONERROR);
+				char buf[MAX_PATH];
+				wcstombs(buf, fd.cFileName, MAX_PATH);
+				MessageBoxA(0, strcat((char*)"Failed to load ", buf), "", MB_ICONERROR);
 			}
 		}
-	} while (FindNextFileA(file, &fd));
-	SetCurrentDirectoryA(baseDir);
+	} while (FindNextFileW(file, &fd));
+	SetCurrentDirectoryW(baseDir);
 }
 
+_Bool inited = 0;
 BOOL WINAPI DllMain(HMODULE mod, DWORD cause, void *ctx)
 {
-	if (cause != DLL_PROCESS_ATTACH) {
+	if (cause != DLL_PROCESS_ATTACH || inited) {
 		return TRUE;
 	}
+	inited = 1;
 	Init();
 	Load();
 
