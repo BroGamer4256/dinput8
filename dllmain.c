@@ -68,7 +68,7 @@ void Load()
 	SetCurrentDirectoryW(dir);
 
 	WIN32_FIND_DATAW fd;
-	HANDLE file = FindFirstFileW(L"*.dva", &fd);
+	HANDLE file = FindFirstFileW(L"*.dll", &fd);
 	if (file == INVALID_HANDLE_VALUE) return;
 
 	do
