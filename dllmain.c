@@ -78,7 +78,7 @@ void Load()
 		wcscpy(filePath, dir);
 
 		wchar_t* dot = wcsrchr(fd.cFileName, '.');
-		if (dot && !wcscmp(dot, L".dva"))
+		if (dot && !wcscmp(dot, L".dll"))
 		{
 			wcscat(filePath, fd.cFileName);
 			if (LoadLibraryW(filePath) == 0)
